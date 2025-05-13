@@ -42,6 +42,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="Practice HTML, CSS, and JavaScript with free, random coding challenges on WebDevTrainer.">
+<meta name="keywords" content="web development, coding challenges, HTML, CSS, JavaScript, learn to code">
     <title>Web Development Training Platform</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/codemirror.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/mode/xml/xml.min.js"></script>
@@ -93,17 +95,56 @@
             height: 100%;
             border: none;
         }
-        .challenge {
-            margin-bottom: 20px;
-        }
-        .challenge h2 {
-            font-size: 1.5em;
-            color: #2c3e50;
-        }
-        .challenge p {
-            font-size: 1em;
-            line-height: 1.6;
-        }
+
+.challenge {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+.challenge h2 {
+    color: #2c3e50;
+    font-size: 1.8em;
+    margin-bottom: 10px;
+}
+.challenge p {
+    color: #34495e;
+    line-height: 1.6;
+    margin-bottom: 15px;
+}
+.challenge h3 {
+    color: #2c3e50;
+    font-size: 1.4em;
+    margin-bottom: 10px;
+}
+.challenge ul {
+    list-style: none;
+    padding: 0;
+}
+.challenge li {
+    margin: 10px 0;
+    display: flex;
+    align-items: center;
+    font-size: 1em;
+}
+.challenge input[type="checkbox"] {
+    margin-right: 10px;
+    width: 20px;
+    height: 20px;
+}
+@media (max-width: 768px) {
+    .challenge {
+        padding: 15px;
+    }
+    .challenge h2 {
+        font-size: 1.5em;
+    }
+    .challenge h3 {
+        font-size: 1.2em;
+    }
+}
+            
         .evaluation {
             margin-top: 20px;
         }
@@ -143,10 +184,12 @@
 <body>
     <div class="container">
         <div class="editors">
-            <div class="challenge">
-                <h2>Challenge: Create a Personal Bio Page</h2>
-                <p>Build a simple webpage with a heading, a paragraph about yourself, and a styled button. Use HTML for structure, CSS for styling, and JavaScript to make the button alert a message when clicked.</p>
-            </div>
+<div class="challenge">
+    <h2 id="challenge-title">Loading Challenge...</h2>
+    <p id="challenge-description">Please wait while we load your challenge.</p>
+    <h3>Requirements</h3>
+    <ul id="challenge-requirements"></ul>
+</div>
             <div class="editor">
                 <label for="htmlEditor">HTML</label>
                 <textarea id="htmlEditor"></textarea>
@@ -159,16 +202,10 @@
                 <label for="jsEditor">JavaScript</label>
                 <textarea id="jsEditor"></textarea>
             </div>
-            <div class="evaluation">
-                <h2>Self-Evaluation Checklist</h2>
-                <ul>
-                    <li><input type="checkbox" id="heading"> Includes a heading with your name</li>
-                    <li><input type="checkbox" id="paragraph"> Contains a paragraph with bio information</li>
-                    <li><input type="checkbox" id="button"> Has a styled button with hover effect</li>
-                    <li><input type="checkbox" id="alert"> Button triggers an alert on click</li>
-                    <li><input type="checkbox" id="responsive"> Page is responsive on mobile devices</li>
-                </ul>
-                <button onclick="evaluate()">Submit Evaluation</button>
+          <div class="evaluation">
+    <h2>Self-Evaluation Checklist</h2>
+    <button onclick="evaluate()">Submit Evaluation</button>
+</div>
             </div>
         </div>
         <div class="preview">
@@ -176,6 +213,80 @@
         </div>
     </div>
     <script>
+
+            // Load and select a random challenge
+async function loadChallenge() {
+    try {
+        const response = await fetch('challenges.json');
+        if (!response.ok) throw new Error('Failed to fetch challenges');
+        const challenges = await response.json();
+        const history = JSON.parse(localStorage.getItem('challengeHistory') || '[]');
+        
+        // Filter out recently viewed challenges (last 5)
+        const availableChallenges = challenges.filter(ch => !history.includes(ch.id));
+        if (availableChallenges.length === 0) {
+            // Reset history if all challenges viewed
+            localStorage.setItem('challengeHistory', JSON.stringify([]));
+            availableChallenges.push(...challenges);
+        }
+        
+        // Select random challenge
+        const challenge = availableChallenges[Math.floor(Math.random() * availableChallenges.length)];
+        
+        // Update history
+        history.push(challenge.id);
+        if (history.length > 5) history.shift(); // Keep last 5
+        localStorage.setItem('challengeHistory', JSON.stringify(history));
+        
+        return challenge;
+    } catch (error) {
+        console.error('Error loading challenge:', error);
+        // Fallback challenge
+        return {
+            id: 0,
+            title: "Fallback Challenge: Simple Page",
+            description: "Create a simple webpage with a heading and a paragraph. Style it with CSS and add a button with an alert.",
+            requirements: [
+                "Includes a heading",
+                "Includes a styled paragraph",
+                "Has a button with an alert"
+            ],
+            starterCode: {
+                html: "<h1>Welcome</h1>\n<p>Write something!</p>\n<button id=\"myButton\">Click</button>",
+                css: "body { font-family: 'Roboto', sans-serif; text-align: center; }",
+                js: "document.getElementById('myButton').addEventListener('click', () => { alert('Hello!'); });"
+            }
+        };
+    }
+}
+            // Render the challenge in the UI
+async function renderChallenge() {
+    const challenge = await loadChallenge();
+    if (!challenge) return;
+    
+    // Update UI
+    document.getElementById('challenge-title').textContent = challenge.title;
+    document.getElementById('challenge-description').textContent = challenge.description;
+    
+    // Populate requirements as checkboxes
+    const requirementsList = document.getElementById('challenge-requirements');
+    requirementsList.innerHTML = challenge.requirements.map(req => `
+        <li><input type="checkbox" class="requirement"> ${req}</li>
+    `).join('');
+    
+    // Set starter code
+    htmlEditor.setValue(challenge.starterCode.html || '');
+    cssEditor.setValue(challenge.starterCode.css || '');
+    jsEditor.setValue(challenge.starterCode.js || '');
+    
+    // Update preview
+    updatePreview();
+}
+
+// Call on page load
+document.addEventListener('DOMContentLoaded', renderChallenge);
+
+            
         // Initialize CodeMirror editors
         const htmlEditor = CodeMirror.fromTextArea(document.getElementById('htmlEditor'), {
             mode: 'xml',
@@ -225,17 +336,14 @@
         jsEditor.setValue(`document.getElementById('myButton').addEventListener('click', () => {\n    alert('Hello!');\n});`);
 
         // Evaluation function
-        function evaluate() {
-            const checkboxes = document.querySelectorAll('.evaluation input[type="checkbox"]');
-            let score = 0;
-            checkboxes.forEach(checkbox => {
-                if (checkbox.checked) score++;
-            });
-            alert(`You completed ${score} out of ${checkboxes.length} checklist items! Review your work and try to meet all criteria.`);
-        }
-
-        // Initial preview
-        updatePreview();
+       function evaluate() {
+    const checkboxes = document.querySelectorAll('.requirement');
+    let score = 0;
+    checkboxes.forEach(checkbox => {
+        if (checkbox.checked) score++;
+    });
+    alert(`You completed ${score} out of ${checkboxes.length} requirements! Review your work to meet all criteria.`);
+}
     </script>
 </body>
 </html>
