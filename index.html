@@ -14,123 +14,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script defer src="script.js"></script>
-    <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f4f4f9;
-            color: #333;
-        }
-        .container {
-            display: flex;
-            max-width: 1200px;
-            margin: 0 auto;
-            gap: 20px;
-        }
-        .editors, .preview {
-            flex: 1;
-        }
-        .editor {
-            margin-bottom: 20px;
-        }
-        .editor label {
-            font-size: 1.2em;
-            font-weight: bold;
-            margin-bottom: 10px;
-            display: block;
-        }
-        .CodeMirror {
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            height: 200px;
-        }
-        .preview {
-            background: #fff;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 10px;
-            height: 600px;
-            overflow: auto;
-        }
-        .preview iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-        .challenge {
-            background: #ffffff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-        }
-        .challenge h2 {
-            color: #2c3e50;
-            font-size: 1.8em;
-            margin-bottom: 10px;
-        }
-        .challenge p {
-            color: #34495e;
-            line-height: 1.6;
-            margin-bottom: 15px;
-        }
-        .challenge h3 {
-            color: #2c3e50;
-            font-size: 1.4em;
-            margin-bottom: 10px;
-        }
-        .challenge ul {
-            list-style: none;
-            padding: 0;
-        }
-        .challenge li {
-            margin: 10px 0;
-            display: flex;
-            align-items: center;
-            font-size: 1em;
-        }
-        .challenge input[type="checkbox"] {
-            margin-right: 10px;
-            width: 20px;
-            height: 20px;
-        }
-        .evaluation {
-            margin-top: 20px;
-        }
-        .evaluation h2 {
-            font-size: 1.5em;
-            color: #2c3e50;
-        }
-        button {
-            background-color: #3498db;
-            color: #fff;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 1em;
-            margin: 10px;
-        }
-        button:hover {
-            background-color: #2980b9;
-        }
-        @media (max-width: 768px) {
-            .container {
-                flex-direction: column;
-            }
-            .challenge {
-                padding: 15px;
-            }
-            .challenge h2 {
-                font-size: 1.5em;
-            }
-            .challenge h3 {
-                font-size: 1.2em;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="style.css" rel="stylesheet">
+
 </head>
+
 <body>
     <div class="container" role="main" aria-label="WebDevTrainer coding environment">
         <div class="editors">
@@ -155,13 +42,13 @@
             <div class="evaluation">
                 <h2>Self-Evaluation Checklist</h2>
                 <button onclick="evaluate()">Submit Evaluation</button>
-                <button onclick="updatePreview()">Reset Preview</button>
             </div>
         </div>
         <div class="preview" aria-label="Live preview of your code">
             <iframe id="previewFrame" aria-hidden="true" tabindex="-1"></iframe>
         </div>
     </div>
-   
+    
+    <script src="script.js"></script>
 </body>
 </html>
