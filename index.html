@@ -6,13 +6,13 @@
     <meta name="description" content="Practice HTML, CSS, and JavaScript with free, random coding challenges on WebDevTrainer.">
     <meta name="keywords" content="web development, coding challenges, HTML, CSS, JavaScript, learn to code">
     <title>WebDevTrainer</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/codemirror.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/mode/xml/xml.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/mode/css/css.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/mode/javascript/javascript.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/codemirror.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/mode/xml/xml.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/mode/css/css.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/mode/javascript/javascript.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/codemirror.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         body {
             font-family: 'Roboto', sans-serif;
@@ -109,6 +109,7 @@
             border-radius: 4px;
             cursor: pointer;
             font-size: 1em;
+            margin: 10px;
         }
         button:hover {
             background-color: #2980b9;
@@ -153,10 +154,11 @@
             <div class="evaluation">
                 <h2>Self-Evaluation Checklist</h2>
                 <button onclick="evaluate()">Submit Evaluation</button>
+                <button onclick="updatePreview()">Reset Preview</button>
             </div>
         </div>
-        <div class="preview">
-            <iframe id="previewFrame"></iframe>
+        <div class="preview" aria-label="Live preview of your code">
+            <iframe id="previewFrame" aria-hidden="true" tabindex="-1"></iframe>
         </div>
     </div>
     <script>
@@ -247,19 +249,39 @@
         // Update preview
         function updatePreview() {
             const html = htmlEditor.getValue();
-            const css = `<style>${cssEditor.getValue()}</style>`;
-            const js = `<script>try { ${jsEditor.getValue()} } catch (e) { console.error(e); }</script>`;
+            const css = cssEditor.getValue();
+            const js = jsEditor.getValue();
+            const escapedJs = js.replace(/<\/script>/gi, '<\\/script>');
             const content = `
                 <!DOCTYPE html>
-                <html>
-                <head>${css}</head>
-                <body>${html}${js}</body>
+                <html lang="en">
+                <head>
+                    <style>${css}</style>
+                </head>
+                <body>
+                    ${html}
+                    <script>
+                        try {
+                            ${escapedJs}
+                        } catch (e) {
+                            console.error('Script error:', e);
+                            document.body.innerHTML += '<p style="color: red;">Error executing JavaScript. Check console for details.</p>';
+                        }
+                    </script>
+                </body>
                 </html>
             `;
             const frame = document.getElementById('previewFrame');
-            frame.contentDocument.open();
-            frame.contentDocument.write(content);
-            frame.contentDocument.close();
+            try {
+                frame.contentDocument.open();
+                frame.contentDocument.write(content);
+                frame.contentDocument.close();
+            } catch (e) {
+                console.error('Preview error:', e);
+                frame.contentDocument.open();
+                frame.contentDocument.write('<p>Error rendering preview. Please check your code.</p>');
+                frame.contentDocument.close();
+            }
         }
 
         // Update preview on code change
