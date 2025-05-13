@@ -1,23 +1,241 @@
-<!DOCTYPE html>
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
 <html lang="en">
-  <head>
-    <title>Home</title>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
-    <!--
-      Need a visual blank slate?
-      Remove all code in `styles.css`!
-    -->
-    <link rel="stylesheet" href="styles.css" />
-    <script type="module" src="script.js"></script>
-  </head>
-  <body>
-    <nav>
-      <a href="/" aria-current="page">Home</a>
-      <a href="/page2.html">Other page</a>
-    </nav>
-    <main>
-      <h1>Home page</h1>
-    </main>
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Development Training Platform</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/mode/xml/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/mode/css/css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/mode/javascript/javascript.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/codemirror.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .container {
+            display: flex;
+            max-width: 1200px;
+            margin: 0 auto;
+            gap: 20px;
+        }
+        .editors, .preview {
+            flex: 1;
+        }
+        .editor {
+            margin-bottom: 20px;
+        }
+        .editor label {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: block;
+        }
+        .CodeMirror {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            height: 200px;
+        }
+        .preview {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            height: 600px;
+            overflow: auto;
+        }
+        .preview iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .challenge {
+            margin-bottom: 20px;
+        }
+        .challenge h2 {
+            font-size: 1.5em;
+            color: #2c3e50;
+        }
+        .challenge p {
+            font-size: 1em;
+            line-height: 1.6;
+        }
+        .evaluation {
+            margin-top: 20px;
+        }
+        .evaluation h2 {
+            font-size: 1.5em;
+            color: #2c3e50;
+        }
+        .evaluation ul {
+            list-style: none;
+            padding: 0;
+        }
+        .evaluation li {
+            margin: 10px 0;
+        }
+        .evaluation input {
+            margin-right: 10px;
+        }
+        button {
+            background-color: #3498db;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="editors">
+            <div class="challenge">
+                <h2>Challenge: Create a Personal Bio Page</h2>
+                <p>Build a simple webpage with a heading, a paragraph about yourself, and a styled button. Use HTML for structure, CSS for styling, and JavaScript to make the button alert a message when clicked.</p>
+            </div>
+            <div class="editor">
+                <label for="htmlEditor">HTML</label>
+                <textarea id="htmlEditor"></textarea>
+            </div>
+            <div class="editor">
+                <label for="cssEditor">CSS</label>
+                <textarea id="cssEditor"></textarea>
+            </div>
+            <div class="editor">
+                <label for="jsEditor">JavaScript</label>
+                <textarea id="jsEditor"></textarea>
+            </div>
+            <div class="evaluation">
+                <h2>Self-Evaluation Checklist</h2>
+                <ul>
+                    <li><input type="checkbox" id="heading"> Includes a heading with your name</li>
+                    <li><input type="checkbox" id="paragraph"> Contains a paragraph with bio information</li>
+                    <li><input type="checkbox" id="button"> Has a styled button with hover effect</li>
+                    <li><input type="checkbox" id="alert"> Button triggers an alert on click</li>
+                    <li><input type="checkbox" id="responsive"> Page is responsive on mobile devices</li>
+                </ul>
+                <button onclick="evaluate()">Submit Evaluation</button>
+            </div>
+        </div>
+        <div class="preview">
+            <iframe id="previewFrame"></iframe>
+        </div>
+    </div>
+    <script>
+        // Initialize CodeMirror editors
+        const htmlEditor = CodeMirror.fromTextArea(document.getElementById('htmlEditor'), {
+            mode: 'xml',
+            theme: 'default',
+            lineNumbers: true,
+            autoCloseTags: true
+        });
+        const cssEditor = CodeMirror.fromTextArea(document.getElementById('cssEditor'), {
+            mode: 'css',
+            theme: 'default',
+            lineNumbers: true,
+            autoCloseBrackets: true
+        });
+        const jsEditor = CodeMirror.fromTextArea(document.getElementById('jsEditor'), {
+            mode: 'javascript',
+            theme: 'default',
+            lineNumbers: true,
+            autoCloseBrackets: true
+        });
+
+        // Function to update preview
+        function updatePreview() {
+            const html = htmlEditor.getValue();
+            const css = `<style>${cssEditor.getValue()}</style>`;
+            const js = `<script>${jsEditor.getValue()}<\/script>`;
+            const content = `
+                <!DOCTYPE html>
+                <html>
+                <head>${css}</head>
+                <body>${html}${js}</body>
+                </html>
+            `;
+            const frame = document.getElementById('previewFrame');
+            frame.contentDocument.open();
+            frame.contentDocument.write(content);
+            frame.contentDocument.close();
+        }
+
+        // Update preview on code change
+        htmlEditor.on('change', updatePreview);
+        cssEditor.on('change', updatePreview);
+        jsEditor.on('change', updatePreview);
+
+        // Initialize with sample code
+        htmlEditor.setValue(`<h1>My Bio</h1>\n<p>Tell us about yourself!</p>\n<button id="myButton">Click Me</button>`);
+        cssEditor.setValue(`body {\n    font-family: 'Roboto', sans-serif;\n    text-align: center;\n    padding: 20px;\n}\nbutton {\n    background-color: #3498db;\n    color: white;\n    padding: 10px 20px;\n    border: none;\n    border-radius: 4px;\n    cursor: pointer;\n}\nbutton:hover {\n    background-color: #2980b9;\n}`);
+        jsEditor.setValue(`document.getElementById('myButton').addEventListener('click', () => {\n    alert('Hello!');\n});`);
+
+        // Evaluation function
+        function evaluate() {
+            const checkboxes = document.querySelectorAll('.evaluation input[type="checkbox"]');
+            let score = 0;
+            checkboxes.forEach(checkbox => {
+                if (checkbox.checked) score++;
+            });
+            alert(`You completed ${score} out of ${checkboxes.length} checklist items! Review your work and try to meet all criteria.`);
+        }
+
+        // Initial preview
+        updatePreview();
+    </script>
+</body>
 </html>
