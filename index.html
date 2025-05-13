@@ -12,7 +12,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/mode/javascript/javascript.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/codemirror.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         body {
             font-family: 'Roboto', sans-serif;
@@ -270,11 +270,22 @@
         // Evaluation function
         function evaluate() {
             const checkboxes = document.querySelectorAll('.requirement');
-            let score = 0;
+            let completed = 0;
             checkboxes.forEach(checkbox => {
-                if (checkbox.checked) score++;
+                if (checkbox.checked) completed++;
             });
-            alert(`You completed ${score} out of ${checkboxes.length} requirements! Review your work to meet all criteria.`);
+            const htmlCode = htmlEditor.getValue();
+            const cssCode = cssEditor.getValue();
+            const jsCode = jsEditor.getValue();
+
+            // Store in session storage
+            sessionStorage.setItem('stars', completed);
+            sessionStorage.setItem('htmlCode', htmlCode);
+            sessionStorage.setItem('cssCode', cssCode);
+            sessionStorage.setItem('jsCode', jsCode);
+
+            // Redirect to result page
+            window.location.href = 'result.html';
         }
 
         // Load challenge on page load
